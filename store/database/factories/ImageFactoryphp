@@ -1,0 +1,17 @@
+<?
+use App\Models\Image;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ImageFactory extends Factory
+{
+    protected $model = Image::class;
+
+    public function definition()
+    {
+        return [
+            'product_id' => \App\Models\Product::factory(), // Assuming you have a Product model and a corresponding factory
+            'image' => $this->faker->image('public/storage/images', 640, 480, null, false),
+            // Define other attributes as needed
+        ];
+    }
+}

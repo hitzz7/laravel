@@ -1,11 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Notifications\ProductCreatedNotification;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Item;
 use App\Models\Image;
+use App\Mail\SendMail;
+use Illuminate\Support\Facades\Mail;
+use App\Events\ProductCreated;
+use Illuminate\Support\Facades\Notification;
+
 
 class ProductController extends Controller
 {
@@ -38,6 +43,9 @@ class ProductController extends Controller
         foreach ($request->input('items') as $itemData) {
             $product->items()->create($itemData);
         }
+       Mail::to('najus777@gmail.com')->send(new SendMail());
+ 
+        
 
         return response()->json(['message' => 'Product added successfully', 'id' => $product->id]);
     }

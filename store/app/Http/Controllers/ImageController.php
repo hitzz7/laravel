@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Image;
-
+use App\Models\Product;
 class ImageController extends Controller
 
 {
@@ -24,56 +24,72 @@ class ImageController extends Controller
         ]);
 
         // File upload logic here
+        $product_id = $request->input('product_id');
+        
         $uploadedFile = $request->file('image');
-        $uploadedFileName = time().'.'.$uploadedFile->getClientOriginalExtension();
-        $path = $uploadedFile->storeAs('images', $uploadedFileName, 'public');
-
+        $originalFileName = $uploadedFile->getClientOriginalName();
+        $uploadedFileName = $originalFileName;
+        $uploadedFile->move(public_path('images'), $uploadedFileName);
         // Create Image
         $image = Image::create([
+            'product_id' => $product_id,
             'image' => $uploadedFileName,
         ]);
 
         // Associate Image with Product
-        $product = Product::find($request->input('product_id'));
+       
         
-        if (!$product) {
-            // Handle product not found
-            return response()->json(['error' => 'Product not found'], 404);
-        }
-
-        $product->image()->associate($image);
-        $product->save();
+       
 
         return response()->json(['message' => 'Image created and associated with the product', 'image_id' => $image->id]);
     }
-    public function update(Request $request, $imageId)
+     public function update(Request $request, $imageId)
     {
         // Validation logic here
-
-        $image = Image::find($imageId);
-
-        if (!$image) {
-            return response()->json(['error' => 'Image not found'], 404);
-        }
-
-        // File upload logic here
-
-        $image->update([
-            'image' => $uploadedFileName,
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        return response()->json(['message' => 'Image updated successfully', 'image_id' => $imageId]);
+        $product_id = $request->input('product_id');
+        $uploadedFile = $request->file('image');
+
+        // Retrieve the existing image record
+        $image = Image::findOrFail($imageId);
+
+        // If a new image is provided, update the file and original name
+        if ($uploadedFile) {
+            $originalFileName = $uploadedFile->getClientOriginalName();
+            $uploadedFileName = $originalFileName;
+            $uploadedFile->move(public_path('images'), $uploadedFileName);
+
+            // Update Image record
+            $image->update([
+                'product_id' => $product_id,
+                'image' => $uploadedFileName
+                
+            ]);
+        } else {
+            // If no new image is provided, only update the product_id
+            $image->update([
+                'product_id' => $product_id,
+            ]);
+        }
+
+        return response()->json(['message' => 'Image updated successfully', 'image_id' => $image->id]);
     }
 
-    public function destroy($imageId)
+    public function destory($imageId)
     {
-        $image = Image::find($imageId);
+        // Retrieve the existing image record
+        $image = Image::findOrFail($imageId);
 
-        if ($image) {
-            $image->delete();
-            return response()->json(['message' => 'Image deleted successfully', 'image_id' => $imageId]);
-        } else {
-            return response()->json(['error' => 'Image not found'], 404);
-        }
+        // Delete the file from the public/images directory
+        Storage::delete('images/' . $image->image);
+
+        // Delete the image record from the database
+        $image->delete();
+
+        return response()->json(['message' => 'Image deleted successfully', 'image_id' => $imageId]);
     }
 }
