@@ -15,7 +15,7 @@ class ProductCreated
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $product;
-    public function __construct(Product $product)
+    public function __construct($product)
     {
         $this->product = $product;
     }

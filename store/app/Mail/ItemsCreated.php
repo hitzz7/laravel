@@ -9,11 +9,13 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\SendMail as ItemsCreatedMailable;
+use App\Mail\ItemsCreated as SendMailMailable;
 
-class SendMail extends Mailable
+class ItemsCreated extends Mailable
 {
     use Queueable, SerializesModels;
+    
+    
     
 
     /**
@@ -23,8 +25,6 @@ class SendMail extends Mailable
     {
         
         
-        
-    
     }
 
     /**
@@ -33,7 +33,8 @@ class SendMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Send Mail',
+            
+            subject: 'Itemcreated',
         );
     }
 
@@ -43,7 +44,7 @@ class SendMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.product_created',
+            view: 'emails.items_created',
         );
     }
 
@@ -56,5 +57,5 @@ class SendMail extends Mailable
     {
         return [];
     }
-   
+    
 }

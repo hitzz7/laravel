@@ -10,7 +10,8 @@ use App\Mail\SendMail;
 use Illuminate\Support\Facades\Mail;
 use App\Events\ProductCreated;
 use Illuminate\Support\Facades\Notification;
-
+use App\Jobs\SendReminderEmail;
+use App\Notifications\SendSMSNotification;
 
 class ProductController extends Controller
 {
@@ -33,17 +34,32 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // Validation logic here
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'quantity' => 'required|integer|min:0',
+            'items' => 'required|array', // Items should be an array
+            'items.*.size' => 'required|string|max:255',
+            'items.*.color' => 'required|string|max:255',
+            'items.*.status' => 'required|boolean',
+            'items.*.sku' => 'required|string|max:255',
+            'items.*.price' => 'required|numeric|min:0',
+        ]);
 
         $product = Product::create([
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
+            'name' => $validatedData['name'],
+            'description' => $validatedData['description'],
+            'quantity' => $validatedData['quantity'],
         ]);
 
         foreach ($request->input('items') as $itemData) {
             $product->items()->create($itemData);
         }
-       Mail::to('najus777@gmail.com')->send(new SendMail());
+        $recipientPhoneNumber = '9808439770';
+        event(new ProductCreated($product));
+        $product->notify(new SendSMSNotification(),$recipientPhoneNumber);
+        SendReminderEmail::dispatch($product);
+
  
         
 
