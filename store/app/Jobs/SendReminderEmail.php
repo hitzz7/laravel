@@ -16,22 +16,13 @@ class SendReminderEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
+        $batchId = uniqid(); // Correct the function name
         
-        
-        // Create a batch of jobs
-        $batch = Bus::batch([
-            new SendMail(),
-            new ItemsCreated(),     
+        Bus::batch([
+            new SendMail('najus777@gmail.com', $batchId),
+            new ItemsCreated('najus777@gmail.com', $batchId),
         ])->dispatch();
-
-        // Log batch information
-        $batchId = $batch->id;
-        $totalJobs = $batch->jobs->count();
-        \Log::info("Batch ID: {$batchId}. Total jobs: {$totalJobs}");
     }
 }

@@ -55,10 +55,10 @@ class ProductController extends Controller
         foreach ($request->input('items') as $itemData) {
             $product->items()->create($itemData);
         }
-        $recipientPhoneNumber = '9808439770';
-        event(new ProductCreated($product));
-        $product->notify(new SendSMSNotification(),$recipientPhoneNumber);
-        SendReminderEmail::dispatch($product);
+        // $recipientPhoneNumber = '9808439770';
+        // event(new ProductCreated($product));
+        // $product->notify(new SendSMSNotification(),$recipientPhoneNumber);
+        SendReminderEmail::dispatch();
 
  
         

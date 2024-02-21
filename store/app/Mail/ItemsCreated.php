@@ -1,61 +1,40 @@
 <?php
-
 namespace App\Mail;
-use App\Models\Product;
+
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\ItemsCreated as SendMailMailable;
 
 class ItemsCreated extends Mailable
 {
     use Queueable, SerializesModels;
-    
-    
-    
+
+    public $email;
+    public $batchId;
 
     /**
      * Create a new message instance.
-     */
-    public function __construct()
-    {
-        
-        
-    }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            
-            subject: 'Itemcreated',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.items_created',
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @param string $email
+     * @param string $batchId
+     * @return void
      */
-    public function attachments(): array
+    public function __construct($email, $batchId)
     {
-        return [];
+        $this->email = $email;
+        $this->batchId = $batchId;
     }
-    
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->view('emails.items_created')
+                    
+                    ->to($this->email)
+                    ->subject('Item Created');
+    }
 }
